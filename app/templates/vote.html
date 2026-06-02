@@ -77,10 +77,6 @@
   <div class="lv-list">
     {% set ns = namespace(last='') %}
     {% for c in concepts %}
-      {% if c.section and c.section != ns.last %}
-        <div class="lv-section">{{ c.section }}</div>
-        {% set ns.last = c.section %}
-      {% endif %}
       {% set n = counts[c.id] %}
       {% set pct = ((n / total) * 100) | round | int if total else 0 %}
       {% set is_mine = (my_vote == c.id) %}
