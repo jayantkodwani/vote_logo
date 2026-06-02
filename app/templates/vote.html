@@ -31,12 +31,13 @@
   .lv-wm-main b{color:var(--teal);}
   .lv-wm-sub{font-size:.6rem; letter-spacing:.32em; text-transform:uppercase; color:var(--slate); margin-top:5px;}
 
-  .lv-row{display:flex; align-items:center; gap:20px; padding:18px 24px 20px; flex-wrap:wrap;}
-  .lv-meta{flex:1; min-width:220px;}
+  .lv-row{display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:18px 24px 20px;}
+  .lv-meta{width:100%;}   /* description spans full width */
+ .lv-meter{width:100%;}  /* results bar spans full width */
   .lv-idx{font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-weight:700;}
   .lv-name{font-family:"Fraunces",serif; font-size:1.28rem; font-weight:600; margin:2px 0 3px;}
   .lv-desc{color:var(--slate); font-size:.9rem; margin:0;}
-  .lv-meter{flex:1 1 220px; min-width:200px;}
+ 
   .lv-bar{height:9px; background:var(--paper-2); border-radius:99px; overflow:hidden;}
   .lv-bar>span{display:block; height:100%; border-radius:99px;
     background:linear-gradient(90deg,var(--green-deep),var(--green)); transition:width .6s;}
