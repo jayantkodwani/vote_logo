@@ -1,0 +1,49 @@
+# Deploy to Azure Web App (Python, Linux) on every push to main.
+#
+# SETUP (one time):
+#   1. In Azure Portal -> your Web App -> "Get publish profile" (download).
+#   2. In GitHub repo -> Settings -> Secrets and variables -> Actions ->
+#      New repository secret named AZURE_WEBAPP_PUBLISH_PROFILE = (paste the file contents).
+#   3. Edit AZURE_WEBAPP_NAME below to your Web App's name.
+#
+# Alternatively, use the Azure Portal "Deployment Center" to connect this repo;
+# it will generate an equivalent workflow automatically. Keep only one.
+
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: ltc-fund-swift-logo-vote   # <-- change to your Web App name
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Zip artifact for deployment
+        run: zip -r release.zip . -x "venv/*" ".git/*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: release.zip
