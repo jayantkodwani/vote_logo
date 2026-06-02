@@ -80,17 +80,17 @@ SVGS = {
 }
 
 CONCEPTS = [
-    {"id":"monogram","n":1,"section":"Final brand designs (from PDF)","name":"Monogram Lockup","desc":"The horizontal serif LTC monogram with the divider rule and \"Capital Call\".","kind":"img"},
-    {"id":"crowned","n":2,"section":"","name":"Crowned Monogram","desc":"The interlocked LTC monogram topped with the gold crown.","kind":"img"},
-    {"id":"emblem","n":3,"section":"","name":"Gold Seal Emblem","desc":"The circular gold seal with the \"Luxury to Cash / Capital Call\" lockup.","kind":"img"},
-    {"id":"script","n":4,"section":"","name":"Script","desc":"The flowing script LTC over the \"Luxury to Cash / Capital Call\" lockup.","kind":"img"},
-    {"id":"slash","n":5,"section":"","name":"Diamond Slash","desc":"The bold LTC with the gold diamond-and-slash and \"Capital Call\".","kind":"img"},
-    {"id":"swift","n":6,"section":"Earlier concept directions","name":"Swift Ascend","desc":"An abstract swift — the fastest bird in level flight — with wings that resolve into an upward arrow. It fuses the brand's speed promise (swift calls, swift acknowledgments) with capital growth. Trailing motion lines reinforce momentum; the gold spark nods to capital. Reads instantly at favicon size.","kind":"svg"},
-    {"id":"signal","n":7,"section":"","name":"Call Signal","desc":"A capital call is a timely signal sent to investors — this mark literalizes it. Concentric arcs broadcast outward from a solid core, the inner arc breaking into an upward tick: the call goes out, capital answers. The most conceptually on-the-nose to \"capital call.\"","kind":"svg"},
-    {"id":"velocity","n":8,"section":"","name":"Velocity","desc":"Three ascending chevrons read two ways at once — fast-forward » for Swift, and a rising staircase for capital growth and momentum. The most minimal and modern; scales beautifully to app icons, loaders and email headers. Strong system-mark for UI.","kind":"svg"},
-    {"id":"northstar","n":10,"section":"","name":"North Star","desc":"A guiding star set in a compass ring — clarity, confidence and direction for every capital call. The elongated form reads as both a beacon and upward growth. The most premium and timeless option; signals a steady hand for investors entrusting committed capital.","kind":"svg"},
-    {"id":"bell","n":11,"section":"","name":"The Call","desc":"A notification bell with an unread badge — the literal \"you have a capital call\" moment investors act on. It speaks the language of a modern portal (alerts, acknowledgments, deadlines) and is the most immediately legible to non-finance users. Friendly yet purposeful.","kind":"svg"},
-    {"id":"pillars","n":12,"section":"","name":"Capital Pillars","desc":"Three ascending columns read at once as classical pillars (trust, custody, institution) and a growth bar chart, the tallest capped with an upward chevron. The most \"fund-grade\" and conservative option — reassuring for LPs and committees.","kind":"svg"},
+   
+    {"id":"crowned","n":1,"section":"","name":"Crowned Monogram","desc":"The interlocked LTC monogram topped with the gold crown.","kind":"img"},
+    {"id":"emblem","n":2,"section":"","name":"Gold Seal Emblem","desc":"The circular gold seal with the \"Luxury to Cash / Capital Call\" lockup.","kind":"img"},
+    {"id":"script","n":3,"section":"","name":"Script","desc":"The flowing script LTC over the \"Luxury to Cash / Capital Call\" lockup.","kind":"img"},
+    {"id":"slash","n":4,"section":"","name":"Diamond Slash","desc":"The bold LTC with the gold diamond-and-slash and \"Capital Call\".","kind":"img"},
+    {"id":"swift","n":5,"section":"Earlier concept directions","name":"Swift Ascend","desc":"An abstract swift — the fastest bird in level flight — with wings that resolve into an upward arrow. It fuses the brand's speed promise (swift calls, swift acknowledgments) with capital growth. Trailing motion lines reinforce momentum; the gold spark nods to capital. Reads instantly at favicon size.","kind":"svg"},
+    {"id":"signal","n":6,"section":"","name":"Call Signal","desc":"A capital call is a timely signal sent to investors — this mark literalizes it. Concentric arcs broadcast outward from a solid core, the inner arc breaking into an upward tick: the call goes out, capital answers. The most conceptually on-the-nose to \"capital call.\"","kind":"svg"},
+    {"id":"velocity","n":7,"section":"","name":"Velocity","desc":"Three ascending chevrons read two ways at once — fast-forward » for Swift, and a rising staircase for capital growth and momentum. The most minimal and modern; scales beautifully to app icons, loaders and email headers. Strong system-mark for UI.","kind":"svg"},
+    {"id":"northstar","n":8,"section":"","name":"North Star","desc":"A guiding star set in a compass ring — clarity, confidence and direction for every capital call. The elongated form reads as both a beacon and upward growth. The most premium and timeless option; signals a steady hand for investors entrusting committed capital.","kind":"svg"},
+    {"id":"bell","n":9,"section":"","name":"The Call","desc":"A notification bell with an unread badge — the literal \"you have a capital call\" moment investors act on. It speaks the language of a modern portal (alerts, acknowledgments, deadlines) and is the most immediately legible to non-finance users. Friendly yet purposeful.","kind":"svg"},
+    {"id":"pillars","n":10,"section":"","name":"Capital Pillars","desc":"Three ascending columns read at once as classical pillars (trust, custody, institution) and a growth bar chart, the tallest capped with an upward chevron. The most \"fund-grade\" and conservative option — reassuring for LPs and committees.","kind":"svg"},
   
 ]
 
