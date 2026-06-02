@@ -1,7 +1,0 @@
-Flask==3.0.3
-Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.36
-gunicorn==23.0.0
-# Only needed if you point DATABASE_URL at PostgreSQL (e.g. Azure Database for PostgreSQL).
-# Harmless to keep; remove if you stay on the default SQLite.
-psycopg2-binary==2.9.10
