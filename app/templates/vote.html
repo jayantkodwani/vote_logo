@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  .lv-head{border-bottom:1px solid var(--line); padding-bottom:24px; margin-bottom:18px;
+  .lv-head{border-bottom:1px solid var(--line); padding-bottom:24px; margin-bottom:16px;
     display:flex; justify-content:space-between; align-items:flex-end; gap:22px; flex-wrap:wrap;}
   .lv-title{font-family:"Fraunces",serif; font-weight:600; font-size:clamp(1.9rem,5vw,3rem);
     line-height:1.04; letter-spacing:-.015em; margin:0 0 8px; max-width:20ch;}
@@ -10,6 +10,18 @@
   .lv-tally{text-align:right;}
   .lv-tally .num{font-family:"Fraunces",serif; font-size:2.4rem; font-weight:600; line-height:1; color:var(--green);}
   .lv-tally .lbl{font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--slate); margin-top:5px;}
+
+  /* TOP HIGHLIGHT: 3-votes rule */
+  .lv-callout{display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:linear-gradient(90deg, rgba(180,132,24,.12), rgba(24,66,36,.08));
+    border:1px solid var(--gold-soft); border-left:5px solid var(--gold);
+    border-radius:14px; padding:14px 18px; margin:0 0 26px;}
+  .lv-callout .ico{font-family:"Fraunces",serif; font-weight:700; color:var(--gold); font-size:1.3rem; line-height:1;}
+  .lv-callout .txt{font-size:.95rem; color:var(--ink);}
+  .lv-callout .txt b{color:var(--green);}
+  .lv-callout .pips{display:inline-flex; gap:5px; margin-left:auto;}
+  .lv-callout .pip{width:13px; height:13px; border-radius:99px; border:2px solid var(--green);}
+  .lv-callout .pip.used{background:var(--green);}
 
   .lv-section{font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:var(--gold);
     font-weight:700; margin:26px 0 12px; display:flex; align-items:center; gap:10px;}
@@ -43,56 +55,50 @@
   .lv-meter-row{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; font-size:.8rem; color:var(--slate);}
   .lv-meter-row .pct{font-family:"Fraunces",serif; font-size:1.1rem; font-weight:600; color:var(--ink);}
   .lv-vote{border:1px solid var(--green); background:var(--green); color:#fff; font:inherit; font-weight:600;
-    font-size:.92rem; padding:11px 26px; border-radius:11px; cursor:pointer; transition:.15s; min-width:160px;}
+    font-size:.92rem; padding:11px 26px; border-radius:11px; cursor:pointer; transition:.15s; min-width:170px;}
   .lv-vote:hover{background:var(--green-deep); border-color:var(--green-deep);}
-  .lv-card.mine .lv-vote{background:transparent; color:var(--green);}
-  .lv-card.mine .lv-vote::before{content:"\2713  ";}
+  .lv-vote.picked{background:transparent; color:var(--green);}
+  .lv-vote.picked::before{content:"\2713  ";}
+  .lv-vote.picked:hover{background:#fdeaea; border-color:#c0392b; color:#c0392b;}
+  .lv-vote[disabled]{background:var(--paper-2); border-color:var(--line); color:var(--slate); cursor:not-allowed;}
 
-  .lv-comment{margin:24px 0 6px;}
-  .lv-comment label{display:block; font-size:.82rem; color:var(--slate); margin-bottom:6px;}
-  .lv-comment textarea{width:100%; border:1px solid var(--line); border-radius:11px; padding:11px 13px;
-    font:inherit; resize:vertical; min-height:66px; background:var(--white); color:var(--ink);}
-  .lv-foot{margin-top:28px; padding-top:18px; border-top:1px solid var(--line);
-    color:var(--slate); font-size:.82rem;}
+  .lv-foot{margin-top:28px; padding-top:18px; border-top:1px solid var(--line); color:var(--slate); font-size:.82rem;}
 
-  /* admin link, bottom corner */
   .lv-admin-link{position:fixed; right:14px; bottom:12px; font-size:.72rem; letter-spacing:.12em;
     text-transform:uppercase; color:var(--slate); opacity:.55; text-decoration:none;
     background:var(--white); border:1px solid var(--line); padding:6px 12px; border-radius:99px;}
   .lv-admin-link:hover{opacity:1; color:var(--green); border-color:var(--green);}
 
-  /* modal */
-  .lv-modal{position:fixed; inset:0; background:rgba(14,30,18,.55); display:none;
-    align-items:center; justify-content:center; padding:20px; z-index:50;}
+  .lv-modal{position:fixed; inset:0; background:rgba(14,30,18,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:50;}
   .lv-modal.open{display:flex;}
-  .lv-modal-box{background:var(--white); border-radius:18px; max-width:440px; width:100%;
-    padding:28px 28px 24px; box-shadow:0 30px 80px -30px rgba(14,30,18,.6); animation:pop .25s ease;}
+  .lv-modal-box{background:var(--white); border-radius:18px; max-width:440px; width:100%; padding:28px 28px 24px;
+    box-shadow:0 30px 80px -30px rgba(14,30,18,.6); animation:pop .25s ease;}
   @keyframes pop{from{transform:translateY(10px) scale(.98); opacity:0;} to{transform:none; opacity:1;}}
   .lv-modal h3{font-family:"Fraunces",serif; font-weight:600; font-size:1.4rem; margin:0 0 6px;}
-  .lv-modal p{color:var(--slate); font-size:.92rem; margin:0 0 18px;}
+  .lv-modal p{color:var(--slate); font-size:.92rem; margin:0 0 16px;}
   .lv-pick{display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line);
-    border-radius:12px; padding:12px 14px; margin-bottom:18px;}
+    border-radius:12px; padding:12px 14px; margin-bottom:16px;}
   .lv-pick .pk-lbl{font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); font-weight:700;}
   .lv-pick .pk-name{font-family:"Fraunces",serif; font-weight:600; font-size:1.05rem;}
   .lv-modal label{display:block; font-size:.78rem; color:var(--slate); margin:0 0 6px; font-weight:600;}
-  .lv-modal input[type=text]{width:100%; border:1px solid var(--line); border-radius:11px; padding:12px 13px;
-    font:inherit; background:var(--white); color:var(--ink);}
-  .lv-modal input[type=text]:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(24,66,36,.12);}
+  .lv-modal input[type=text], .lv-modal textarea{width:100%; border:1px solid var(--line); border-radius:11px;
+    padding:11px 13px; font:inherit; background:var(--white); color:var(--ink);}
+  .lv-modal textarea{resize:vertical; min-height:54px; margin-top:12px;}
+  .lv-modal input[type=text]:focus, .lv-modal textarea:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(24,66,36,.12);}
   .lv-err{color:#c0392b; font-size:.8rem; margin:7px 0 0; display:none;}
-  .lv-modal-actions{display:flex; gap:12px; margin-top:22px;}
+  .lv-modal-actions{display:flex; gap:12px; margin-top:20px;}
   .lv-btn{flex:1; font:inherit; font-weight:600; font-size:.92rem; padding:12px; border-radius:11px; cursor:pointer; transition:.15s;}
   .lv-btn-cancel{background:transparent; border:1px solid var(--line); color:var(--slate);}
   .lv-btn-cancel:hover{border-color:var(--slate);}
   .lv-btn-confirm{background:var(--green); border:1px solid var(--green); color:#fff;}
   .lv-btn-confirm:hover{background:var(--green-deep); border-color:var(--green-deep);}
-
-  @media(max-width:560px){ .lv-vote{width:100%;} }
+  @media(max-width:560px){ .lv-vote{width:100%;} .lv-callout .pips{margin-left:0;} }
 </style>
 
 <div class="lv-head">
   <div>
     <h1 class="lv-title">LTC <em>Capital Call</em> &mdash; choose the logo</h1>
-    <p class="lv-sub">Please vote for the best logo for the LTC Capital Call portal.</p>
+    <p class="lv-sub">Please vote for the best logos for the LTC Capital Call portal.</p>
   </div>
   <div class="lv-tally">
     <div class="num">{{ total }}</div>
@@ -100,69 +106,87 @@
   </div>
 </div>
 
-<form method="post" action="{{ url_for('main.cast') }}" id="vote-form">
+<!-- TOP HIGHLIGHT: up to 3 votes -->
+<div class="lv-callout">
+  <span class="ico">★</span>
+  <span class="txt">
+    <b>You can vote for up to {{ max_votes }} logos.</b>
+    Pick your favourites — {% if my_name %}you've used <b>{{ used }}</b> of {{ max_votes }} votes.{% else %}each person gets {{ max_votes }} votes.{% endif %}
+    Tap a green pick again to remove it.
+  </span>
+  {% if my_name %}
+  <span class="pips" title="{{ used }} of {{ max_votes }} used">
+    {% for i in range(max_votes) %}<span class="pip {{ 'used' if i < used }}"></span>{% endfor %}
+  </span>
+  {% endif %}
+</div>
+
+<!-- hidden form used by the confirmation modal to add a vote -->
+<form method="post" action="{{ url_for('main.cast') }}" id="vote-form" style="display:none;">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
   <input type="hidden" name="concept_id" id="f-concept" value="">
   <input type="hidden" name="voter_name" id="f-name" value="">
-
-  <div class="lv-list">
-    {% set ns = namespace(last='') %}
-    {% for c in concepts %}
-      {% if c.section and c.section != ns.last %}
-        <div class="lv-section">{{ c.section }}</div>
-        {% set ns.last = c.section %}
-      {% endif %}
-      {% set n = counts[c.id] %}
-      {% set pct = ((n / total) * 100) | round | int if total else 0 %}
-      {% set is_mine = (my_vote == c.id) %}
-      <article class="lv-card {{ 'mine' if is_mine }} {{ 'leading' if (leader == c.id and total) }}">
-        {% if c.kind == 'img' %}
-          <div class="lv-figure"><img src="{{ c.img }}" alt="{{ c.name }} logo"></div>
-        {% else %}
-          <div class="lv-figure"><div class="lv-tile">{{ c.svg | safe }}
-            <div><div class="lv-wm-main">LTC&nbsp;Fund <b>Swift</b></div><div class="lv-wm-sub">Capital&nbsp;Call</div></div>
-          </div></div>
-        {% endif %}
-        <div class="lv-row">
-          <div class="lv-meta">
-            <div class="lv-idx">Option {{ c.n }}</div>
-            <h2 class="lv-name">{{ c.name }}</h2>
-            <p class="lv-desc">{{ c.desc }}</p>
-          </div>
-          <div class="lv-meter">
-            <div class="lv-bar"><span style="width: {{ pct }}%;"></span></div>
-            <div class="lv-meter-row">
-              <span>{{ n }} vote{{ '' if n == 1 else 's' }}</span>
-              <span class="pct">{{ pct }}%</span>
-            </div>
-          </div>
-          <button class="lv-vote" type="button"
-                  data-vote data-id="{{ c.id }}" data-name="Option {{ c.n }} — {{ c.name }}">
-            {{ 'Your pick' if is_mine else 'Vote for this' }}
-          </button>
-        </div>
-      </article>
-    {% endfor %}
-  </div>
-
-  <div class="lv-comment">
-    <label for="lv-comment">Any comments on your choice? (optional &mdash; saved with your vote)</label>
-    <textarea id="lv-comment" name="comment" placeholder="Optional…">{{ my_comment }}</textarea>
-  </div>
+  <input type="hidden" name="comment" id="f-comment" value="">
 </form>
 
-<div class="lv-foot">
-  Results are stored server-side and shared across everyone &middot; one vote per person (you can change it any time).
+<div class="lv-list">
+  {% set ns = namespace(last='') %}
+  {% for c in concepts %}
+    {% if c.section and c.section != ns.last %}
+      <div class="lv-section">{{ c.section }}</div>
+      {% set ns.last = c.section %}
+    {% endif %}
+    {% set n = counts[c.id] %}
+    {% set pct = ((n / total) * 100) | round | int if total else 0 %}
+    {% set is_mine = (c.id in my_votes) %}
+    <article class="lv-card {{ 'mine' if is_mine }} {{ 'leading' if (leader == c.id and total) }}">
+      {% if c.kind == 'img' %}
+        <div class="lv-figure"><img src="{{ c.img }}" alt="{{ c.name }} logo"></div>
+      {% else %}
+        <div class="lv-figure"><div class="lv-tile">{{ c.svg | safe }}
+          <div><div class="lv-wm-main">LTC&nbsp;Fund <b>Swift</b></div><div class="lv-wm-sub">Capital&nbsp;Call</div></div>
+        </div></div>
+      {% endif %}
+      <div class="lv-row">
+        <div class="lv-meta">
+          <div class="lv-idx">Option {{ c.n }}</div>
+          <h2 class="lv-name">{{ c.name }}</h2>
+          <p class="lv-desc">{{ c.desc }}</p>
+        </div>
+        <div class="lv-meter">
+          <div class="lv-bar"><span style="width: {{ pct }}%;"></span></div>
+          <div class="lv-meter-row">
+            <span>{{ n }} vote{{ '' if n == 1 else 's' }}</span>
+            <span class="pct">{{ pct }}%</span>
+          </div>
+        </div>
+        {% if is_mine %}
+          <form method="post" action="{{ url_for('main.remove') }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <input type="hidden" name="concept_id" value="{{ c.id }}">
+            <button class="lv-vote picked" type="submit" title="Remove this vote">Voted &mdash; remove</button>
+          </form>
+        {% elif remaining <= 0 and my_name %}
+          <button class="lv-vote" type="button" disabled title="You've used all {{ max_votes }} votes">{{ max_votes }} of {{ max_votes }} votes used</button>
+        {% else %}
+          <button class="lv-vote" type="button" data-vote data-id="{{ c.id }}" data-name="Option {{ c.n }} — {{ c.name }}">Vote for this</button>
+        {% endif %}
+      </div>
+    </article>
+  {% endfor %}
 </div>
 
-<!-- bottom-corner admin entry -->
+<div class="lv-foot">
+  Results are stored server-side and shared across everyone &middot; up to {{ max_votes }} votes per person (you can change them any time).
+</div>
+
 <a class="lv-admin-link" href="{{ url_for('main.admin') }}">Admin</a>
 
 <!-- vote confirmation modal -->
 <div class="lv-modal" id="vote-modal" role="dialog" aria-modal="true" aria-labelledby="vm-title">
   <div class="lv-modal-box">
     <h3 id="vm-title">Confirm your vote</h3>
-    <p>Please enter your name and confirm to submit your vote.</p>
+    <p>You can pick up to {{ max_votes }} logos. Enter your name and confirm to submit this vote.</p>
     <div class="lv-pick">
       <div>
         <div class="pk-lbl">You are voting for</div>
@@ -172,6 +196,7 @@
     <label for="vm-name">Your name</label>
     <input type="text" id="vm-name" autocomplete="name" placeholder="e.g. Jane Smith" value="{{ my_name }}">
     <p class="lv-err" id="vm-err">Please enter your name to continue.</p>
+    <textarea id="vm-comment" placeholder="Optional comment about this choice…"></textarea>
     <div class="lv-modal-actions">
       <button type="button" class="lv-btn lv-btn-cancel" id="vm-cancel">Cancel</button>
       <button type="button" class="lv-btn lv-btn-confirm" id="vm-confirm">Confirm vote</button>
@@ -184,14 +209,16 @@
   const modal=document.getElementById('vote-modal');
   const pickEl=document.getElementById('vm-pick');
   const nameEl=document.getElementById('vm-name');
+  const commentEl=document.getElementById('vm-comment');
   const errEl=document.getElementById('vm-err');
   const form=document.getElementById('vote-form');
   const fConcept=document.getElementById('f-concept');
   const fName=document.getElementById('f-name');
+  const fComment=document.getElementById('f-comment');
   let pendingId=null;
 
   function open(id,label){
-    pendingId=id; pickEl.textContent=label; errEl.style.display='none';
+    pendingId=id; pickEl.textContent=label; errEl.style.display='none'; commentEl.value='';
     modal.classList.add('open');
     setTimeout(()=>{ nameEl.focus(); nameEl.select(); },50);
   }
@@ -207,7 +234,7 @@
   function submit(){
     const name=(nameEl.value||'').trim();
     if(!name){ errEl.style.display='block'; nameEl.focus(); return; }
-    fConcept.value=pendingId; fName.value=name;
+    fConcept.value=pendingId; fName.value=name; fComment.value=commentEl.value.trim();
     form.submit();
   }
   document.getElementById('vm-confirm').addEventListener('click',submit);

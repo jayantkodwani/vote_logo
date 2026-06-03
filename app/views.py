@@ -7,7 +7,7 @@ from flask import (
     session, jsonify, current_app,
 )
 
-from .models import db, LogoVote
+from .models import db, LogoVote, MAX_VOTES_PER_USER
 from .concepts import CONCEPTS, CONCEPT_IDS
 
 bp = Blueprint("main", __name__)
@@ -15,11 +15,16 @@ bp = Blueprint("main", __name__)
 
 # --------------------------------------------------------------------------- #
 #  Identity — voters are identified by the name they type in the popup.
-#  The name (normalised) is the unique key, so each person has one changeable
-#  vote regardless of device.
 # --------------------------------------------------------------------------- #
 def _norm(name: str) -> str:
     return " ".join((name or "").split()).lower()
+
+
+def _user_votes(key):
+    """All of this voter's picks (rows)."""
+    if not key:
+        return []
+    return LogoVote.query.filter_by(voter_key=key).all()
 
 
 # --------------------------------------------------------------------------- #
@@ -64,9 +69,9 @@ def index():
     counts, total, leader = tally()
 
     my_name = session.get("voter_name") or ""
-    mine = None
-    if my_name:
-        mine = LogoVote.query.filter_by(voter_key=_norm(my_name)).first()
+    my_rows = _user_votes(_norm(my_name)) if my_name else []
+    my_votes = [r.concept_id for r in my_rows]
+    used = len(my_votes)
 
     return render_template(
         "vote.html",
@@ -74,9 +79,11 @@ def index():
         counts=counts,
         total=total,
         leader=leader,
-        my_vote=(mine.concept_id if mine else None),
-        my_comment=(mine.comment if mine else ""),
         my_name=my_name,
+        my_votes=my_votes,
+        used=used,
+        remaining=max(0, MAX_VOTES_PER_USER - used),
+        max_votes=MAX_VOTES_PER_USER,
     )
 
 
@@ -97,20 +104,53 @@ def cast():
         return redirect(url_for("main.index"))
 
     key = _norm(name)
-    vote = LogoVote.query.filter_by(voter_key=key).first()
-    if vote is None:
-        vote = LogoVote(voter_key=key, voter_name=name)
-        db.session.add(vote)
-    vote.voter_name = name
-    vote.concept_id = concept_id
-    if comment is not None:
-        vote.comment = comment
+    session["voter_name"] = name  # remember to highlight their picks
+
+    rows = LogoVote.query.filter_by(voter_key=key).all()
+    existing = {r.concept_id: r for r in rows}
+    label = next((c["name"] for c in CONCEPTS if c["id"] == concept_id), concept_id)
+
+    if concept_id in existing:
+        # already a pick — just update the comment / name
+        existing[concept_id].comment = comment
+        existing[concept_id].voter_name = name
+        db.session.commit()
+        flash(f"Your vote for “{label}” is already counted.", "info")
+        return redirect(url_for("main.index"))
+
+    if len(rows) >= MAX_VOTES_PER_USER:
+        flash(
+            f"You can vote for up to {MAX_VOTES_PER_USER} logos. "
+            f"Remove one of your picks to choose a different logo.",
+            "warning",
+        )
+        return redirect(url_for("main.index"))
+
+    db.session.add(LogoVote(voter_key=key, voter_name=name,
+                            concept_id=concept_id, comment=comment))
     db.session.commit()
 
-    session["voter_name"] = name  # remember so we can highlight their pick
+    used = len(rows) + 1
+    flash(f"Thanks, {name} — vote {used} of {MAX_VOTES_PER_USER} recorded for “{label}”.", "success")
+    return redirect(url_for("main.index"))
 
-    label = next((c["name"] for c in CONCEPTS if c["id"] == concept_id), concept_id)
-    flash(f"Thanks, {name} — your vote for “{label}” has been recorded.", "success")
+
+@bp.route("/remove", methods=["POST"])
+def remove():
+    if not _csrf_ok():
+        abort(400)
+    name = session.get("voter_name") or (request.form.get("voter_name") or "").strip()
+    concept_id = (request.form.get("concept_id") or "").strip()
+    if not name:
+        flash("Enter your name and vote first.", "warning")
+        return redirect(url_for("main.index"))
+
+    row = LogoVote.query.filter_by(voter_key=_norm(name), concept_id=concept_id).first()
+    if row:
+        label = next((c["name"] for c in CONCEPTS if c["id"] == concept_id), concept_id)
+        db.session.delete(row)
+        db.session.commit()
+        flash(f"Removed your vote for “{label}”.", "info")
     return redirect(url_for("main.index"))
 
 
@@ -134,6 +174,7 @@ def admin():
     names = {c["id"]: c["name"] for c in CONCEPTS}
     votes = LogoVote.query.order_by(LogoVote.updated_at.desc()).all()
     counts, total, leader = tally()
+    distinct_voters = db.session.query(LogoVote.voter_key).distinct().count()
     return render_template(
         "admin.html",
         votes=votes,
@@ -142,6 +183,8 @@ def admin():
         total=total,
         leader=leader,
         leader_name=(names.get(leader) if leader else None),
+        distinct_voters=distinct_voters,
+        max_votes=MAX_VOTES_PER_USER,
     )
 
 
