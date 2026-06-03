@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Results · Admin · Logo Vote{% endblock %}
+{% block content %}
+<style>
+  .ad-head{display:flex; justify-content:space-between; align-items:flex-end; gap:18px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:22px;}
+  .ad-title{font-family:"Fraunces",serif; font-weight:600; font-size:2rem; margin:0;}
+  .ad-sub{color:var(--slate); font-size:.9rem; margin:6px 0 0;}
+  .ad-actions{display:flex; gap:10px; align-items:center;}
+  .ad-btn{font:inherit; font-size:.8rem; padding:8px 14px; border-radius:99px; cursor:pointer; text-decoration:none;
+    border:1px solid var(--line); color:var(--slate); background:var(--white);}
+  .ad-btn:hover{border-color:var(--green); color:var(--green);}
+  .ad-btn.danger:hover{border-color:#c0392b; color:#c0392b;}
+
+  .ad-stats{display:flex; gap:24px; flex-wrap:wrap; margin-bottom:22px;}
+  .ad-stat .v{font-family:"Fraunces",serif; font-size:1.8rem; font-weight:600; color:var(--green); line-height:1;}
+  .ad-stat .k{font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--slate); margin-top:5px;}
+
+  table{width:100%; border-collapse:collapse; background:var(--white); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden;}
+  th,td{text-align:left; padding:12px 16px; font-size:.9rem; border-bottom:1px solid var(--line);}
+  th{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--slate); background:var(--paper);}
+  tr:last-child td{border-bottom:none;}
+  td.sel{font-weight:600;}
+  .ad-empty{padding:24px 16px; color:var(--slate);}
+  .pill{display:inline-block; background:var(--paper); border:1px solid var(--line); border-radius:99px;
+    padding:2px 10px; font-size:.8rem;}
+</style>
+
+<div class="ad-head">
+  <div>
+    <h1 class="ad-title">Vote results</h1>
+    <p class="ad-sub">Every recorded vote with voter name, selection and timestamp (most recent first).</p>
+  </div>
+  <div class="ad-actions">
+    <a class="ad-btn" href="{{ url_for('main.index') }}">View vote page</a>
+    <a class="ad-btn" href="{{ url_for('main.admin_logout') }}">Sign out</a>
+    <form method="post" action="{{ url_for('main.admin_reset') }}"
+          onsubmit="return confirm('Clear ALL votes? This cannot be undone.');" style="display:inline;">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="ad-btn danger" type="submit">Reset all</button>
+    </form>
+  </div>
+</div>
+
+<div class="ad-stats">
+  <div class="ad-stat"><div class="v">{{ votes|length }}</div><div class="k">Total votes</div></div>
+  <div class="ad-stat"><div class="v">{{ leader_name or '—' }}</div><div class="k">Leading logo</div></div>
+</div>
+
+{% if votes %}
+<table>
+  <thead>
+    <tr><th style="width:36px;">#</th><th>Voter name</th><th>Voted selection</th><th>Comment</th><th>Timestamp (UTC)</th></tr>
+  </thead>
+  <tbody>
+    {% for v in votes %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ v.voter_name }}</td>
+        <td class="sel">{{ names.get(v.concept_id, v.concept_id) }}</td>
+        <td>{{ v.comment or '—' }}</td>
+        <td>{{ v.updated_at.strftime('%d %b %Y, %H:%M') }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="ad-empty">No votes yet.</div>
+{% endif %}
+{% endblock %}

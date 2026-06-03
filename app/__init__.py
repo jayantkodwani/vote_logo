@@ -44,6 +44,8 @@ def create_app() -> Flask:
             for e in os.environ.get("ADMIN_EMAILS", "").split(",")
             if e.strip()
         ],
+        # Password for the /admin results page (override via env in production).
+        ADMIN_PASSWORD=os.environ.get("ADMIN_PASSWORD", "ipay"),
     )
     if os.environ.get("WEBSITE_SITE_NAME"):
         # Behind Azure's HTTPS front end.

@@ -32,12 +32,11 @@
   .lv-wm-sub{font-size:.6rem; letter-spacing:.32em; text-transform:uppercase; color:var(--slate); margin-top:5px;}
 
   .lv-row{display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:18px 24px 20px;}
-  .lv-meta{width:100%;}   /* description spans full width */
- .lv-meter{width:100%;}  /* results bar spans full width */
+  .lv-meta{width:100%;}
+  .lv-meter{width:100%;}
   .lv-idx{font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-weight:700;}
   .lv-name{font-family:"Fraunces",serif; font-size:1.28rem; font-weight:600; margin:2px 0 3px;}
   .lv-desc{color:var(--slate); font-size:.9rem; margin:0;}
- 
   .lv-bar{height:9px; background:var(--paper-2); border-radius:99px; overflow:hidden;}
   .lv-bar>span{display:block; height:100%; border-radius:99px;
     background:linear-gradient(90deg,var(--green-deep),var(--green)); transition:width .6s;}
@@ -54,17 +53,46 @@
   .lv-comment textarea{width:100%; border:1px solid var(--line); border-radius:11px; padding:11px 13px;
     font:inherit; resize:vertical; min-height:66px; background:var(--white); color:var(--ink);}
   .lv-foot{margin-top:28px; padding-top:18px; border-top:1px solid var(--line);
-    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; color:var(--slate); font-size:.82rem;}
-  .lv-reset{background:none; border:1px solid var(--line); color:var(--slate); font:inherit;
-    font-size:.78rem; padding:6px 13px; border-radius:99px; cursor:pointer;}
-  .lv-reset:hover{border-color:#c0392b; color:#c0392b;}
-  @media(max-width:560px){ .lv-row{flex-direction:column; align-items:stretch;} .lv-vote{width:100%;} }
+    color:var(--slate); font-size:.82rem;}
+
+  /* admin link, bottom corner */
+  .lv-admin-link{position:fixed; right:14px; bottom:12px; font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--slate); opacity:.55; text-decoration:none;
+    background:var(--white); border:1px solid var(--line); padding:6px 12px; border-radius:99px;}
+  .lv-admin-link:hover{opacity:1; color:var(--green); border-color:var(--green);}
+
+  /* modal */
+  .lv-modal{position:fixed; inset:0; background:rgba(14,30,18,.55); display:none;
+    align-items:center; justify-content:center; padding:20px; z-index:50;}
+  .lv-modal.open{display:flex;}
+  .lv-modal-box{background:var(--white); border-radius:18px; max-width:440px; width:100%;
+    padding:28px 28px 24px; box-shadow:0 30px 80px -30px rgba(14,30,18,.6); animation:pop .25s ease;}
+  @keyframes pop{from{transform:translateY(10px) scale(.98); opacity:0;} to{transform:none; opacity:1;}}
+  .lv-modal h3{font-family:"Fraunces",serif; font-weight:600; font-size:1.4rem; margin:0 0 6px;}
+  .lv-modal p{color:var(--slate); font-size:.92rem; margin:0 0 18px;}
+  .lv-pick{display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; margin-bottom:18px;}
+  .lv-pick .pk-lbl{font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); font-weight:700;}
+  .lv-pick .pk-name{font-family:"Fraunces",serif; font-weight:600; font-size:1.05rem;}
+  .lv-modal label{display:block; font-size:.78rem; color:var(--slate); margin:0 0 6px; font-weight:600;}
+  .lv-modal input[type=text]{width:100%; border:1px solid var(--line); border-radius:11px; padding:12px 13px;
+    font:inherit; background:var(--white); color:var(--ink);}
+  .lv-modal input[type=text]:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(24,66,36,.12);}
+  .lv-err{color:#c0392b; font-size:.8rem; margin:7px 0 0; display:none;}
+  .lv-modal-actions{display:flex; gap:12px; margin-top:22px;}
+  .lv-btn{flex:1; font:inherit; font-weight:600; font-size:.92rem; padding:12px; border-radius:11px; cursor:pointer; transition:.15s;}
+  .lv-btn-cancel{background:transparent; border:1px solid var(--line); color:var(--slate);}
+  .lv-btn-cancel:hover{border-color:var(--slate);}
+  .lv-btn-confirm{background:var(--green); border:1px solid var(--green); color:#fff;}
+  .lv-btn-confirm:hover{background:var(--green-deep); border-color:var(--green-deep);}
+
+  @media(max-width:560px){ .lv-vote{width:100%;} }
 </style>
 
 <div class="lv-head">
   <div>
     <h1 class="lv-title">LTC <em>Capital Call</em> &mdash; choose the logo</h1>
-    <p class="lv-sub">Please vote for the best logo for the LTC Capital Call portal. </p>
+    <p class="lv-sub">Please vote for the best logo for the LTC Capital Call portal.</p>
   </div>
   <div class="lv-tally">
     <div class="num">{{ total }}</div>
@@ -72,11 +100,18 @@
   </div>
 </div>
 
-<form method="post" action="{{ url_for('main.cast') }}">
+<form method="post" action="{{ url_for('main.cast') }}" id="vote-form">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="concept_id" id="f-concept" value="">
+  <input type="hidden" name="voter_name" id="f-name" value="">
+
   <div class="lv-list">
     {% set ns = namespace(last='') %}
     {% for c in concepts %}
+      {% if c.section and c.section != ns.last %}
+        <div class="lv-section">{{ c.section }}</div>
+        {% set ns.last = c.section %}
+      {% endif %}
       {% set n = counts[c.id] %}
       {% set pct = ((n / total) * 100) | round | int if total else 0 %}
       {% set is_mine = (my_vote == c.id) %}
@@ -101,7 +136,8 @@
               <span class="pct">{{ pct }}%</span>
             </div>
           </div>
-          <button class="lv-vote" type="submit" name="concept_id" value="{{ c.id }}">
+          <button class="lv-vote" type="button"
+                  data-vote data-id="{{ c.id }}" data-name="Option {{ c.n }} — {{ c.name }}">
             {{ 'Your pick' if is_mine else 'Vote for this' }}
           </button>
         </div>
@@ -116,13 +152,66 @@
 </form>
 
 <div class="lv-foot">
-  <span>Results are stored server-side and shared across everyone &middot; one vote per signed-in user.</span>
-  {% if is_admin %}
-    <form method="post" action="{{ url_for('main.reset') }}"
-          onsubmit="return confirm('Clear ALL logo votes? This cannot be undone.');">
-      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-      <button class="lv-reset" type="submit">Reset all votes</button>
-    </form>
-  {% endif %}
+  Results are stored server-side and shared across everyone &middot; one vote per person (you can change it any time).
 </div>
+
+<!-- bottom-corner admin entry -->
+<a class="lv-admin-link" href="{{ url_for('main.admin') }}">Admin</a>
+
+<!-- vote confirmation modal -->
+<div class="lv-modal" id="vote-modal" role="dialog" aria-modal="true" aria-labelledby="vm-title">
+  <div class="lv-modal-box">
+    <h3 id="vm-title">Confirm your vote</h3>
+    <p>Please enter your name and confirm to submit your vote.</p>
+    <div class="lv-pick">
+      <div>
+        <div class="pk-lbl">You are voting for</div>
+        <div class="pk-name" id="vm-pick">—</div>
+      </div>
+    </div>
+    <label for="vm-name">Your name</label>
+    <input type="text" id="vm-name" autocomplete="name" placeholder="e.g. Jane Smith" value="{{ my_name }}">
+    <p class="lv-err" id="vm-err">Please enter your name to continue.</p>
+    <div class="lv-modal-actions">
+      <button type="button" class="lv-btn lv-btn-cancel" id="vm-cancel">Cancel</button>
+      <button type="button" class="lv-btn lv-btn-confirm" id="vm-confirm">Confirm vote</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal=document.getElementById('vote-modal');
+  const pickEl=document.getElementById('vm-pick');
+  const nameEl=document.getElementById('vm-name');
+  const errEl=document.getElementById('vm-err');
+  const form=document.getElementById('vote-form');
+  const fConcept=document.getElementById('f-concept');
+  const fName=document.getElementById('f-name');
+  let pendingId=null;
+
+  function open(id,label){
+    pendingId=id; pickEl.textContent=label; errEl.style.display='none';
+    modal.classList.add('open');
+    setTimeout(()=>{ nameEl.focus(); nameEl.select(); },50);
+  }
+  function close(){ modal.classList.remove('open'); pendingId=null; }
+
+  document.querySelectorAll('[data-vote]').forEach(btn=>{
+    btn.addEventListener('click',()=>open(btn.dataset.id, btn.dataset.name));
+  });
+  document.getElementById('vm-cancel').addEventListener('click',close);
+  modal.addEventListener('click',e=>{ if(e.target===modal) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && modal.classList.contains('open')) close(); });
+
+  function submit(){
+    const name=(nameEl.value||'').trim();
+    if(!name){ errEl.style.display='block'; nameEl.focus(); return; }
+    fConcept.value=pendingId; fName.value=name;
+    form.submit();
+  }
+  document.getElementById('vm-confirm').addEventListener('click',submit);
+  nameEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); }});
+})();
+</script>
 {% endblock %}
